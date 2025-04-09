@@ -1,4 +1,4 @@
-## Here is my bashscript supporting PostgreSQL to do the following
+## Here is my bashscript supporting PostgreSQL
 ===
 
 ## Compass Mining Books Database Setup
