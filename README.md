@@ -1,5 +1,4 @@
-## Here is my bashscript supporting PostgreSQL
-===
+## Here is my code-screen (bashscript supporting PostgreSQL)
 
 ## Compass Mining Books Database Setup
 ### Overview
