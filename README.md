@@ -135,7 +135,7 @@ echo "Deployment verification complete."
 4. **Create a View:**
 
 
-* The script creates a view named books_view to allow both users to fetch the book by a specific author:
+* The script creates a view named books_view to allow both users to read book details, and defines a function get_books_by_author that lets users fetch books by a specific author.
 
 ```
 SELECT * FROM get_books_by_author('Christian Okwesili');
