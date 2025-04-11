@@ -132,7 +132,7 @@ echo "Deployment verification complete."
 * view_user is granted read-only access to the database and tables.
 
 
-4. **Create a View:**
+4. **Create a View & defines function:**
 
 
 * The script creates a view named books_view to allow both users to read book details, and defines a function get_books_by_author that lets users fetch books by a specific author.
