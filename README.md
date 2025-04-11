@@ -78,7 +78,7 @@ CREATE TABLE books (
 INSERT INTO books (title, subtitle, author, publisher)
 VALUES (
     'The Brilliance of Compass Mining',
-    'A guide compass mining',
+    'compass mining postgre',
     'Christian Okwesili',
     'Compass Mining Press'
 );
