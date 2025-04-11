@@ -135,7 +135,12 @@ echo "Deployment verification complete."
 4. **Create a View:**
 
 
-* The script creates a view named books_view to allow both users to fetch the book details without directly querying the books table.
+* The script creates a view named books_view to allow both users to fetch the book by a specific author:
+
+```
+SELECT * FROM get_books_by_author('Christian Okwesili');
+
+```
 
 5. **Verify Deployment:**
 
