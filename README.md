@@ -1,6 +1,5 @@
 ## Here is my code-screen (bashscript supporting PostgreSQL)
 
-## Compass Mining Books Database Setup
 ### Overview
 This project creates a PostgreSQL database (books_db) with tables for storing book information (title, subtitle, author, and publisher). It demonstrates how to securely handle sensitive information such as database credentials using AWS KMS to encrypt and decrypt the password securely at runtime.
 
