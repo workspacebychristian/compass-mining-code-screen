@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # Ensure AWS CLI is installed and configured correctly
 if ! command -v aws &> /dev/null; then
   echo "AWS CLI could not be found. Please install AWS CLI and configure it to proceed."
