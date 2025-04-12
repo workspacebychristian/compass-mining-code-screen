@@ -1,18 +1,21 @@
 ## Here is my code-screen (bashscript supporting PostgreSQL)
 
-### Overview
+## Overview
 * This project creates a PostgreSQL database (books_db) with tables for storing book information (title, subtitle, author, and publisher). It demonstrates how to securely handle sensitive information such as database credentials using AWS KMS to encrypt and decrypt the password securely at runtime.
 
-### Key Features
+## Justification of approach
+* I chose AWS KMS over Secrets Manager to take a more manual and practical approach to securing sensitive data such as database credentials. This allowed me to demonstrate how encryption can be handled directly, offering greater control over access and key policies. In a production environment i will typically use Secrets Manager due to its convenience and built-in rotation features, using KMS in this case provided an opportunity to explore and showcase a more hands-on, secure alternative.
+
+## Key Features
 * Automated PostgreSQL database creation and configuration
 
 * Password encryption/decryption with AWS KMS
 
 * Role-based access control with admin and view users
 
-* View for limited data access
+* Creates a view and defines functions
 
-### Environment Setup
+## Environment Setup
 * PostgreSQL installed and running
 
 * AWS CLI installed and configured with appropriate IAM permissions
@@ -36,7 +39,7 @@
 }
 
 ```
-### Encrypt PostgreSQL Password
+## Encrypt PostgreSQL Password
 * The PostgreSQL password is stored securely in AWS KMS. The aws kms encrypt command to encrypt the password and store it in a file.
 
   ```
@@ -52,11 +55,11 @@
 * Set the KMS_KEY_ALIAS environment variable:
 
 ```
-export KMS_KEY_ALIAS="alias/your-kms-key-alias"
+export KMS_KEY_ALIAS=my-postgresql-key
 
 ```
 
-### How it works
+## How it works
 * The script starts by checking for the AWS CLI and required environment variables.
 
 * It decrypts the admin/view password from the encrypted file using KMS.
@@ -69,18 +72,17 @@ export KMS_KEY_ALIAS="alias/your-kms-key-alias"
 
 * Grants the appropriate privileges:
   
-*admin_user: full control*
-
+*admin_user: full control*  
 *view_user: read-only access via a view*
 
 * Creates a view and defines functions: the script creates a view named books_view to allow both users to read book details, and defines function get_books_by_author that lets users fetch books by specific author.
 
 * Prompts for admin_user and view_user passwords and verifies their access.
 
-### Environment Variables 
+## Environment Variables 
 * The script uses the environment variable KMS_KEY_ALIAS to specify the KMS key alias used for decryption. This allows the script to be used across different environments without hardcoding sensitive information.
 
-### Security Considerations
+## Security Considerations
 * **Password Encryption:** The script avoids hardcoding the password by securely storing it in AWS KMS, which is a recommended security practice.
 
 * **Environment Variables:** The use of environment variables for the KMS key alias ensures flexibility across different environments.
@@ -88,7 +90,7 @@ export KMS_KEY_ALIAS="alias/your-kms-key-alias"
 * **IAM Role Permissions:** Only authorized users with kms:Decrypt permission can decrypt the password.
 
 
-### Deployment Steps
+## Deployment Steps
 * Set Up AWS KMS: Encrypt your PostgreSQL password using AWS KMS.
 
 * Execute the script:
@@ -106,7 +108,7 @@ psql -U admin_user -d books_db -c "SELECT * FROM books;"
 ```
 
 
-### Troubleshooting Common Issues
+## Troubleshooting Common Issues
 * **AWS KMS Permissions:** If the script fails to decrypt the password, ensure that the IAM user has the correct kms:Decrypt permission for the specified KMS key.
 
 * **Peer authentication failed** Ensure pg_hba.conf is configured for password authentication, not peer.
