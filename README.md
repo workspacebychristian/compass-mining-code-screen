@@ -77,8 +77,6 @@ export KMS_KEY_ALIAS=my-postgresql-key
 
 * Creates a view and defines functions: the script creates a view named books_view to allow both users to read book details, and defines function get_books_by_author that lets users fetch books by specific author.
 
-* Prompts for admin_user and view_user passwords and verifies their access.
-
 ## Environment Variables 
 * The script uses the environment variable KMS_KEY_ALIAS to specify the KMS key alias used for decryption. This allows the script to be used across different environments without hardcoding sensitive information.
 
@@ -102,9 +100,29 @@ chmod +x compass-mining-books-db.sh
 ./compass-mining-books-db.sh
 ```
 **Verify Deployment:**
+
+* Tests if view_user can access and read data from the books_view (read-only view of the books).
+
 ```
 psql -U view_user -d books_db -c "SELECT * FROM books_view;"
+
+```
+
+* Verifies that admin_user has full access to the actual books table and can retrieve all data.
+```
 psql -U admin_user -d books_db -c "SELECT * FROM books;"
+
+```
+
+* Lists all PostgreSQL databases, their owners, and permissions to confirm database creation.
+```
+psql -U postgres -c "\l"
+
+```
+* Lists all PostgreSQL users (roles) and their privileges to confirm the users were created and their permissions are correctly set.
+```
+psql -U postgres -c "\du"
+
 ```
 
 
