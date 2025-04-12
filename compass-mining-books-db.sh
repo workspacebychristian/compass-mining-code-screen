@@ -1,47 +1,63 @@
 #!/bin/bash
 
-
-# Ensure AWS CLI is installed and configured correctly
+# Ensure AWS CLI is installed
 if ! command -v aws &> /dev/null; then
-  echo "AWS CLI could not be found. Please install AWS CLI and configure it to proceed."
+  echo "AWS CLI could not be found. Please install and configure it."
   exit 1
 fi
 
-# Check if the KMS Key Alias is provided as an environment variable
+# Check if the KMS Key Alias is set
 if [ -z "$KMS_KEY_ALIAS" ]; then
-  echo "Error: KMS_KEY_ALIAS environment variable is required. Please set it before running the script."
+  echo "Error: KMS_KEY_ALIAS environment variable is required."
   exit 1
 fi
 
-# Check if DB_PASSWORD is stored in AWS KMS and decrypt it
+# Decrypt the password from KMS
 DB_PASSWORD=$(aws kms decrypt \
-  --key-id alias/$KMS_KEY_ALIAS \
+  --ciphertext-blob fileb://encrypted_password.txt \
   --query Plaintext \
   --output text | base64 --decode)
 
-# Ensure that the password is properly retrieved
 if [ -z "$DB_PASSWORD" ]; then
-  echo "Error: Unable to retrieve or decrypt the password using AWS KMS."
+  echo "Error: Unable to retrieve or decrypt the password from KMS."
   exit 1
 fi
 
-# Define PostgreSQL database and user details
+# Define DB variables
 DB_NAME="books_db"
 ADMIN_USER="admin_user"
 VIEW_USER="view_user"
-PORT="5432"  # Default port for PostgreSQL
+DB_SUPERUSER="postgres"
+PORT="5432"
 
-# Create the Database
-echo "Creating database '${DB_NAME}'..."
-psql -U postgres -p $PORT -c "CREATE DATABASE ${DB_NAME};"
+# Prompt for postgres password once
+echo "Dropping and recreating database '${DB_NAME}'..."
+PGPASSWORD_PROMPT="Password for PostgreSQL superuser '$DB_SUPERUSER': "
+read -s -p "$PGPASSWORD_PROMPT" PGPASSWORD_INPUT
+export PGPASSWORD="$PGPASSWORD_INPUT"
+echo
 
-# Connect to the database and set up tables, users, and privileges
+# Drop and recreate the DB
+psql -U $DB_SUPERUSER -p $PORT -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"
+psql -U $DB_SUPERUSER -p $PORT -d postgres -c "CREATE DATABASE ${DB_NAME};"
+
 echo "Connecting to '${DB_NAME}' and configuring tables, users, and privileges..."
 
-psql -U postgres -d ${DB_NAME} -p $PORT <<EOF
+psql -U $DB_SUPERUSER -p $PORT -d ${DB_NAME} --set=dbpass="'$DB_PASSWORD'" <<EOF
+-- Drop users if they already exist
+DO \$\$
+BEGIN
+   IF EXISTS (SELECT FROM pg_roles WHERE rolname = '${ADMIN_USER}') THEN
+      DROP ROLE ${ADMIN_USER};
+   END IF;
+   IF EXISTS (SELECT FROM pg_roles WHERE rolname = '${VIEW_USER}') THEN
+      DROP ROLE ${VIEW_USER};
+   END IF;
+END
+\$\$;
 
--- Create the books table
-CREATE TABLE books (
+-- Create table
+CREATE TABLE IF NOT EXISTS books (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255),
     subtitle VARCHAR(255),
@@ -49,7 +65,7 @@ CREATE TABLE books (
     publisher VARCHAR(255)
 );
 
--- Insert a sample book entry
+-- Insert sample book
 INSERT INTO books (title, subtitle, author, publisher)
 VALUES (
     'The Brilliance of Compass Mining',
@@ -58,35 +74,38 @@ VALUES (
     'Compass Mining Press'
 );
 
--- Create the admin user and view user with the decrypted password
-CREATE USER ${ADMIN_USER} WITH PASSWORD '${DB_PASSWORD}';
-CREATE USER ${VIEW_USER} WITH PASSWORD '${DB_PASSWORD}';
+-- Create users
+CREATE USER ${ADMIN_USER} WITH PASSWORD :dbpass;
+CREATE USER ${VIEW_USER} WITH PASSWORD :dbpass;
 
--- Grant privileges to the admin user
+-- Grant admin privileges
 GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO ${ADMIN_USER};
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${ADMIN_USER};
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${ADMIN_USER};
 
--- Grant privileges to the view user
+-- Grant view privileges
 GRANT CONNECT ON DATABASE ${DB_NAME} TO ${VIEW_USER};
 GRANT USAGE ON SCHEMA public TO ${VIEW_USER};
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${VIEW_USER};
 
--- Create a view to allow both users to fetch book details
-CREATE VIEW books_view AS
-SELECT title, subtitle, author, publisher
-FROM books;
+-- Create view
+CREATE OR REPLACE VIEW books_view AS
+SELECT title, subtitle, author, publisher FROM books;
 
+-- Grant SELECT on view explicitly
+GRANT SELECT ON books_view TO ${VIEW_USER};
 EOF
 
-# Verify the deployment
+# Verify users
 echo "Verifying that the users can access the data..."
 
-# Test the view_user by querying the view
-psql -U ${VIEW_USER} -d ${DB_NAME} -p $PORT -c "SELECT * FROM books_view;"
+echo "Enter password for view_user:"
+read -s VIEW_PASS
+PGPASSWORD="$VIEW_PASS" psql -U ${VIEW_USER} -d ${DB_NAME} -p $PORT -c "SELECT * FROM books_view;" || echo "view_user query failed."
 
-# Test the admin_user by querying the books table
-psql -U ${ADMIN_USER} -d ${DB_NAME} -p $PORT -c "SELECT * FROM books;"
+echo "Enter password for admin_user:"
+read -s ADMIN_PASS
+PGPASSWORD="$ADMIN_PASS" psql -U ${ADMIN_USER} -d ${DB_NAME} -p $PORT -c "SELECT * FROM books;" || echo "admin_user query failed."
 
-echo "Deployment verification complete."
+echo "Deployment and verification complete."
 
