@@ -1,21 +1,27 @@
 ## Here is my code-screen (bashscript supporting PostgreSQL)
 
 ## Overview
-* This project creates a PostgreSQL database (books_db) with tables for storing book information (title, subtitle, author, and publisher). It demonstrates how to securely handle sensitive information such as database credentials using AWS KMS to encrypt and decrypt the password securely at runtime.
+* This project automates the creation and secure configuration of a PostgreSQL database (books_db) hosted on an Amazon EC2 instance. It creates tables for storing book information (title, subtitle, author, and publisher). It demonstrates how to securely handle sensitive information such as database credentials using AWS KMS to encrypt and decrypt the password securely at runtime.
 
 ## Justification of approach
-* I chose AWS KMS over Secrets Manager to take a more manual and practical approach to securing sensitive data such as database credentials. This allowed me to demonstrate how encryption can be handled directly, offering greater control over access and key policies. In a production environment i will typically use Secrets Manager due to its convenience and built-in rotation features, using KMS in this case provided an opportunity to explore and showcase a more hands-on, secure alternative.
+* I chose to host PostgreSQL on an EC2 instance to demonstrate how to manually configure and manage a database environment from the ground up.
+
+* I used AWS KMS over Secrets Manager to take a more manual and practical approach to securing sensitive data such as database credentials. This allowed me to demonstrate how encryption can be handled directly, offering greater control over access and key policies. In a production environment i would typically use Secrets Manager due to its convenience and built-in rotation features, using KMS in this case provided an opportunity to explore and showcase a more hands-on, secure alternative.
 
 ## Key Features
 * Automated PostgreSQL database creation and configuration
 
 * Password encryption/decryption with AWS KMS
 
+* Hosted on EC2, simulating real-world database deployment.
+
 * Role-based access control with admin and view users
 
-* Creates a view and defines functions
+* View & Function creation to expose data securely and flexibly.
 
 ## Environment Setup
+* PostgreSQL installed and running on an Amazon EC2 instance (Ubuntu).
+
 * PostgreSQL installed and running
 
 * AWS CLI installed and configured with appropriate IAM permissions
@@ -101,25 +107,25 @@ chmod +x compass-mining-books-db.sh
 ```
 **Verify Deployment:**
 
-* Tests if view_user can access and read data from the books_view (read-only view of the books).
+* view_user (read-only view of the books).
 
 ```
 psql -U view_user -d books_db -c "SELECT * FROM books_view;"
 
 ```
 
-* Verifies that admin_user has full access to the actual books table and can retrieve all data.
+* admin_user (full access to the books table and can retrieve all data).
 ```
 psql -U admin_user -d books_db -c "SELECT * FROM books;"
 
 ```
 
-* Lists all PostgreSQL databases, their owners, and permissions to confirm database creation.
+* Lists all PostgreSQL databases.
 ```
 psql -U postgres -c "\l"
 
 ```
-* Lists all PostgreSQL users (roles) and their privileges to confirm the users were created and their permissions are correctly set.
+* Lists all PostgreSQL users/roles.
 ```
 psql -U postgres -c "\du"
 
@@ -133,4 +139,4 @@ psql -U postgres -c "\du"
 
 * **AWS CLI Configuration:** Ensure that AWS CLI is properly configured with the correct access keys and region.
 
-* **PostgreSQL Connection Issues:** Ensure the PostgreSQL service is running and accessible, and that the psql commands are valid.
+* **PostgreSQL Connection Issues:** Ensure PostgreSQL is running and listening on correct ports, and that the psql commands are valid.
