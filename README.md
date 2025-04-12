@@ -68,6 +68,7 @@ export KMS_KEY_ALIAS="alias/your-kms-key-alias"
 * It then creates a books table to store book details: title, subtitle, author, and publisher.
 
 * Grants the appropriate privileges:
+  
 *admin_user: full control*
 
 *view_user: read-only access via a view*
@@ -80,11 +81,11 @@ export KMS_KEY_ALIAS="alias/your-kms-key-alias"
 * The script uses the environment variable KMS_KEY_ALIAS to specify the KMS key alias used for decryption. This allows the script to be used across different environments without hardcoding sensitive information.
 
 ### Security Considerations
-**Password Encryption:** The script avoids hardcoding the password by securely storing it in AWS KMS, which is a recommended security practice.
+* **Password Encryption:** The script avoids hardcoding the password by securely storing it in AWS KMS, which is a recommended security practice.
 
-**Environment Variables:** The use of environment variables for the KMS key alias ensures flexibility across different environments.
+* **Environment Variables:** The use of environment variables for the KMS key alias ensures flexibility across different environments.
 
-**IAM Role Permissions:** Only authorized users with kms:Decrypt permission can decrypt the password.
+* **IAM Role Permissions:** Only authorized users with kms:Decrypt permission can decrypt the password.
 
 
 ### Deployment Steps
@@ -106,10 +107,10 @@ psql -U admin_user -d books_db -c "SELECT * FROM books;"
 
 
 ### Troubleshooting Common Issues
-**AWS KMS Permissions:** If the script fails to decrypt the password, ensure that the IAM user has the correct kms:Decrypt permission for the specified KMS key.
+* **AWS KMS Permissions:** If the script fails to decrypt the password, ensure that the IAM user has the correct kms:Decrypt permission for the specified KMS key.
 
-**Peer authentication failed** Ensure pg_hba.conf is configured for password authentication, not peer.
+* **Peer authentication failed** Ensure pg_hba.conf is configured for password authentication, not peer.
 
-**AWS CLI Configuration:** Ensure that AWS CLI is properly configured with the correct access keys and region.
+* **AWS CLI Configuration:** Ensure that AWS CLI is properly configured with the correct access keys and region.
 
-**PostgreSQL Connection Issues:** Ensure the PostgreSQL service is running and accessible, and that the psql commands are valid.
+* **PostgreSQL Connection Issues:** Ensure the PostgreSQL service is running and accessible, and that the psql commands are valid.
