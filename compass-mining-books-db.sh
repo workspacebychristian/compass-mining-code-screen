@@ -96,16 +96,4 @@ SELECT title, subtitle, author, publisher FROM books;
 GRANT SELECT ON books_view TO ${VIEW_USER};
 EOF
 
-# Verify users
-echo "Verifying that the users can access the data..."
-
-echo "Enter password for view_user:"
-read -s VIEW_PASS
-PGPASSWORD="$VIEW_PASS" psql -U ${VIEW_USER} -d ${DB_NAME} -p $PORT -c "SELECT * FROM books_view;" || echo "view_user query failed."
-
-echo "Enter password for admin_user:"
-read -s ADMIN_PASS
-PGPASSWORD="$ADMIN_PASS" psql -U ${ADMIN_USER} -d ${DB_NAME} -p $PORT -c "SELECT * FROM books;" || echo "admin_user query failed."
-
-echo "Deployment and verification complete."
 
