@@ -76,18 +76,6 @@ export KMS_KEY_ALIAS="alias/your-kms-key-alias"
 
 * Prompts for admin_user and view_user passwords and verifies their access.
 
-
-3. **Create Users and Grant Privileges:**
-* The script creates two PostgreSQL users (admin_user and view_user), both using the password retrieved from AWS KMS.
-
-* admin_user is granted full privileges on the database and tables.
-
-* view_user is granted read-only access to the database and tables.
-
-4. **Create a View & defines function:**
-* The script verifies that the users can access the data by querying the books_view for view_user and the books table for admin_user.
-
-
 ### Environment Variables 
 * The script uses the environment variable KMS_KEY_ALIAS to specify the KMS key alias used for decryption. This allows the script to be used across different environments without hardcoding sensitive information.
 
